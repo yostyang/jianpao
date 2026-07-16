@@ -19,7 +19,9 @@ function toHex(buf: ArrayBuffer): string {
 /** 导入一个 FIT 文件:哈希去重 → 解析 → 入库 */
 export async function importFitFile(data: ArrayBuffer, fileName: string): Promise<ImportOutcome> {
   try {
-    const fitHash = toHex(await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, data));
+    // 原生端 Crypto.digest 要求 TypedArray(直接传 ArrayBuffer 会抛 NotTypedArrayException),
+    // Web 端 SubtleCrypto 也接受 Uint8Array,故统一包一层
+    const fitHash = toHex(await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, new Uint8Array(data)));
     const parsed = parseFit(data);
     // 地区:起点坐标(模糊到 ~1km)逆地理编码,离线/失败时留空,详情页会自动补
     parsed.summary.region = await regionOfSamples(parsed.samples);

@@ -25,8 +25,8 @@ function devServerOrigin(): string {
   return host ? `http://${host}` : 'http://localhost:8081';
 }
 
-/** 开发用:从 Metro 拉取演示 FIT 并导入 */
-export async function loadDemoData(): Promise<void> {
+/** 开发用:从 Metro 拉取演示 FIT 并导入。silent 时不弹结果提示 */
+export async function loadDemoData(opts?: { silent?: boolean }): Promise<number> {
   const origin = devServerOrigin();
   let ok = 0;
   let dup = 0;
@@ -47,9 +47,12 @@ export async function loadDemoData(): Promise<void> {
     }
   }
   if (ok > 0) notifyActivitiesChanged();
-  showMessage(
-    `演示数据:导入 ${ok} 条` +
-      (dup ? `,跳过重复 ${dup} 条` : '') +
-      (fail ? `,失败 ${fail} 条` : '')
-  );
+  if (!opts?.silent) {
+    showMessage(
+      `演示数据:导入 ${ok} 条` +
+        (dup ? `,跳过重复 ${dup} 条` : '') +
+        (fail ? `,失败 ${fail} 条` : '')
+    );
+  }
+  return ok;
 }
