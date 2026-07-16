@@ -1,18 +1,26 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { Platform, useColorScheme } from 'react-native';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { notifyActivitiesChanged } from '@/lib/useActivities';
+import { importFitFile } from '@/store/importer';
 
-SplashScreen.preventAutoHideAsync();
+if (__DEV__ && Platform.OS === 'web' && typeof window !== 'undefined') {
+  // 开发用:在浏览器控制台注入测试数据 __importFit(arrayBuffer, name)
+  (window as any).__importFit = async (data: ArrayBuffer, name: string) => {
+    const r = await importFitFile(data, name);
+    notifyActivitiesChanged();
+    return r;
+  };
+}
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
+  const scheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
+    <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="activity/[id]" options={{ title: '活动详情', headerBackTitle: '返回' }} />
+      </Stack>
     </ThemeProvider>
   );
 }

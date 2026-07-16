@@ -41,3 +41,7 @@ example
 # generated native folders
 /ios
 /android
+
+# 本地测试用的私人 FIT 数据(含 GPS 位置,不入库)
+public/testdata/
+demo-data/
