@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Accent } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { loadDemoData } from '@/lib/demoData';
 import { runImportFlow } from '@/lib/importFlow';
 import { showMessage } from '@/lib/notify';
 import { providers } from '@/sync/registry';
@@ -35,6 +36,7 @@ function StatusChip({ status }: { status: ProviderStatus }) {
 export default function ProfileScreen() {
   const theme = useTheme();
   const [importing, setImporting] = useState(false);
+  const [loadingDemo, setLoadingDemo] = useState(false);
 
   const onImport = async () => {
     if (importing) return;
@@ -43,6 +45,16 @@ export default function ProfileScreen() {
       await runImportFlow();
     } finally {
       setImporting(false);
+    }
+  };
+
+  const onLoadDemo = async () => {
+    if (loadingDemo) return;
+    setLoadingDemo(true);
+    try {
+      await loadDemoData();
+    } finally {
+      setLoadingDemo(false);
     }
   };
 
@@ -84,6 +96,24 @@ export default function ProfileScreen() {
             <Text style={[styles.rowText, { color: theme.text, marginLeft: 10 }]}>导入 FIT 文件</Text>
             <Ionicons name="chevron-forward" size={15} color={theme.textSecondary} />
           </Pressable>
+          {__DEV__ ? (
+            <Pressable
+              style={[
+                styles.row,
+                { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.backgroundSelected },
+              ]}
+              onPress={onLoadDemo}>
+              {loadingDemo ? (
+                <ActivityIndicator size="small" color={Accent} />
+              ) : (
+                <Ionicons name="flask-outline" size={18} color={Accent} />
+              )}
+              <Text style={[styles.rowText, { color: theme.text, marginLeft: 10 }]}>
+                载入演示数据(开发)
+              </Text>
+              <Ionicons name="chevron-forward" size={15} color={theme.textSecondary} />
+            </Pressable>
+          ) : null}
         </View>
 
         <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>关于</Text>
